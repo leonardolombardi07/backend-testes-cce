@@ -1,9 +1,9 @@
 const express = require("express");
 
+require("./services/database");
 const projectsRoutes = require("./routes/projectsRoutes");
 
 const server = express();
-
 server.use(express.json());
 server.use(projectsRoutes);
 
