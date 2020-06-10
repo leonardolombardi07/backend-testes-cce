@@ -11,7 +11,9 @@ router.get("/project/:name", async (request, response) => {
   const { name } = request.params;
 
   if (!name) {
-    return response.status(500).send("Please provide a project name");
+    return response
+      .status(500)
+      .json({ error: "Please provide a project name" });
   }
 
   try {
@@ -61,6 +63,42 @@ router.post("/projects", async (request, response) => {
     response.status(500).json({
       error:
         "Sorry, something went wrong in our database. Please try again later",
+      detailedError: error.message,
+    });
+  }
+});
+
+router.put("/project/:name", async (request, response) => {
+  const { name } = request.params;
+  const { projectName, projectDescription, projectBugsReport } = request.body;
+  const requestObject = { projectName, projectDescription, projectBugsReport };
+
+  if (!name) {
+    return response
+      .status(500)
+      .json({ error: "Please provide a project name" });
+  }
+
+  try {
+    let editedProject = {};
+    for (var requestItem in requestObject) {
+      if (requestObject[requestItem]) {
+        editedProject[requestItem] = requestObject[requestItem];
+      }
+    }
+
+    const project = await Project.findOneAndUpdate(
+      { projectName: name },
+      editedProject
+    );
+
+    if (!project) {
+      throw new Error("We couldn't find a project with the given name");
+    }
+    response.status(202).json(project);
+  } catch (error) {
+    response.status(500).json({
+      error: "Something went wrong in our server",
       detailedError: error.message,
     });
   }
