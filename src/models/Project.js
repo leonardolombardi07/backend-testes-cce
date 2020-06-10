@@ -16,8 +16,4 @@ const projectSchema = new mongoose.Schema({
   },
 });
 
-const projectsSchema = new mongoose.Schema({
-  projects: [projectSchema],
-});
-
-mongoose.model("Project", projectsSchema);
+mongoose.model("Project", projectSchema);

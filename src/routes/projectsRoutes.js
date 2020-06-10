@@ -14,6 +14,9 @@ router.get("/project/:name", async (request, response) => {
 
   try {
     const project = await Project.find({ projectName: name });
+    if (project.length === 0) {
+      throw new Error("We couldn't find a project with the given name");
+    }
     response.status(200).json(project);
   } catch (error) {
     response.status(500).json({
