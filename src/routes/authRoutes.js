@@ -10,7 +10,7 @@ const User = mongoose.model("User");
 
 const router = Router();
 
-router.get("/podio", (request, response) => {
+router.get("/auth/podio", (request, response) => {
   response.redirect(
     `https://podio.com/oauth/authorize?client_id=${keys.podioClientId}&redirect_uri=${keys.podioRedirectUrl}&scope=user`
   );
