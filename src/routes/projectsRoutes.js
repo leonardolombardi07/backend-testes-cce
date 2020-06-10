@@ -9,7 +9,7 @@ router.get("/project/:name", async (request, response) => {
   const { name } = request.params;
 
   if (!name) {
-    response.status(500).send("Please provide a project name");
+    return response.status(500).send("Please provide a project name");
   }
 
   try {
@@ -42,7 +42,7 @@ router.post("/projects", async (request, response) => {
   const { projectName, projectDescription, projectBugsReport } = request.body;
 
   if (!projectName || !projectDescription) {
-    response.status(400).json({
+    return response.status(400).json({
       error: "Please provide a project name and a project description",
     });
   }
