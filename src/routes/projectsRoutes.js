@@ -1,9 +1,11 @@
 const { Router } = require("express");
 const mongoose = require("mongoose");
+const requireAuth = require("../middlewares/requireAuth");
 
 const Project = mongoose.model("Project");
 
 const router = Router();
+router.use(requireAuth);
 
 router.get("/project/:name", async (request, response) => {
   const { name } = request.params;

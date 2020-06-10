@@ -1,12 +1,14 @@
 const { Router } = require("express");
-const { validateEmail, validatePassword } = require("../utils/validators");
-
-const router = Router();
 const mongoose = require("mongoose");
+const jwb = require("jsonwebtoken");
+const keys = require("../config/keys");
+const { validateEmail, validatePassword } = require("../utils/validators");
 
 const User = mongoose.model("User");
 
-router.post("signup", async (request, response) => {
+const router = Router();
+
+router.post("/signup", async (request, response) => {
   const { email, password } = request.body;
 
   if (!email || !password) {
@@ -27,13 +29,45 @@ router.post("signup", async (request, response) => {
   try {
     const user = new User({ email, password });
     await user.save();
-  } catch (error) {}
-
-  // generate JSON WEB TOKEN
-  // send response with token and user info
+    const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
+    response.status(201).json({
+      email,
+      token,
+    });
+  } catch (error) {
+    response.status(500).json({
+      error: "Something went wrong with our servers. Please try again later.",
+      detailedError: error.message,
+    });
+  }
 });
-router.post("signin", (request, response) => {
-  //
+
+router.post("/signin", async (request, response) => {
+  const { email, password } = request.body;
+
+  if (!email || !password) {
+    return response
+      .status(422)
+      .json({ error: "Please provide a valid email and password" });
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return response
+      .status(400)
+      .json({ error: "We couldn't find a user with this email" });
+  }
+
+  try {
+    await user.comparePassword(password);
+    const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
+    response.status(200).json({ email, token });
+  } catch (error) {
+    response.status(500).json({
+      error: "Something went wrong with our servers. Please try again later.",
+      detailedError: error.message,
+    });
+  }
 });
 
 module.exports = router;
