@@ -12,6 +12,7 @@ const projectSchema = new mongoose.Schema({
   },
   projectBugsReport: {
     type: String,
+    default: "",
   },
 });
 
@@ -19,4 +20,4 @@ const projectsSchema = new mongoose.Schema({
   projects: [projectSchema],
 });
 
-mongoose.model("Projects", projectsSchema);
+mongoose.model("Project", projectsSchema);
