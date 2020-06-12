@@ -6,6 +6,9 @@ const projectSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  projectLogoUrl: {
+    type: String,
+  },
   projectDescription: {
     type: String,
     required: true,
