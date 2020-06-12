@@ -5,6 +5,7 @@ const User = mongoose.model("User");
 
 module.exports = (request, response, next) => {
   const { authorization } = request.headers;
+  console.log(authorization);
 
   if (!authorization) {
     return response.status(401).json({ error: "Please provide a token" });

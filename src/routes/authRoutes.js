@@ -25,6 +25,7 @@ router.get("/auth/podio/callback", async (request, response) => {
     const body = `grant_type=authorization_code&client_id=${keys.podioClientId}&redirect_uri=${keys.podioRedirectUrl}&client_secret=${keys.podioAppSecret}&code=${authCode}`;
     const postUrl = baseUrl + body;
     const { data } = await axios.post(postUrl);
+    request.headers.authorization = data.access_token;
     response.status(200).json(data);
   } catch (error) {
     response.status(500).json({
