@@ -36,12 +36,12 @@ router.get("/auth/podio/callback", async (request, response) => {
 });
 
 router.post("/signup", async (request, response) => {
-  const { email, password } = request.body;
+  const { name, email, password } = request.body;
 
-  if (!email || !password) {
+  if (!name || !email || !password) {
     return response
       .status(400)
-      .json({ error: "Please provide an email and a password" });
+      .json({ error: "Please provide a name, an email and a password" });
   } else if (!validateEmail(email)) {
     return response
       .status(400)
@@ -54,10 +54,11 @@ router.post("/signup", async (request, response) => {
   }
 
   try {
-    const user = new User({ email, password });
+    const user = new User({ name, email, password });
     await user.save();
     const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
     response.status(201).json({
+      name,
       email,
       token,
     });
