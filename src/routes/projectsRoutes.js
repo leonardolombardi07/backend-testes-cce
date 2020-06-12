@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const requireAuth = require("../middlewares/requireAuth");
 const handleImages = require("../middlewares/handleImages");
 const { pathHandler } = require("../utils/pathHandlers");
+const { getValidFileNameFromString } = require("../utils/getters");
 const keys = require("../config/keys");
 
 const Project = mongoose.model("Project");
@@ -56,10 +57,7 @@ router.post(
   async (request, response) => {
     const projectLogo = request.file;
     const { projectName, projectDescription, projectBugsReport } = request.body;
-    const formattedProjectName = projectName.replace(
-      /[ &\/\\#,+()$~%.'":*?<>{}]/g,
-      ""
-    );
+    const formattedProjectName = getValidFileNameFromString(projectName);
 
     if (!projectName || !projectDescription) {
       return response.status(400).json({
@@ -94,11 +92,13 @@ router.put(
   async (request, response) => {
     const projectLogo = request.file;
     const { name } = request.params;
+    console.log(request.query);
     const { projectName, projectDescription, projectBugsReport } = request.body;
-    const formattedProjectName = projectName.replace(
-      /[ &\/\\#,+()$~%.'":*?<>{}]/g,
-      ""
-    );
+
+    const formattedProjectName = getValidFileNameFromString({
+      string: projectName || name,
+    });
+
     const requestObject = {
       projectName,
       projectLogoUrl: projectLogo

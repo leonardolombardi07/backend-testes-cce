@@ -1,5 +1,6 @@
 const multer = require("multer");
 const { pathHandler } = require("../utils/pathHandlers");
+const { getValidFileNameFromString } = require("../utils/getters");
 
 const fileFilter = (request, file, callback) => {
   const type = file.mimetype;
@@ -16,6 +17,7 @@ const storage = multer.diskStorage({
     callback(null, pathHandler({ givenPath: "../data/images" }));
   },
   filename: (request, file, callback) => {
+    const { name } = request.params;
     const { projectName } = request.body;
 
     if (!projectName) {
@@ -25,10 +27,9 @@ const storage = multer.diskStorage({
       return callback(error);
     }
 
-    const formattedProjectName = projectName.replace(
-      /[ &\/\\#,+()$~%.'":*?<>{}]/g,
-      ""
-    );
+    const formattedProjectName = getValidFileNameFromString({
+      string: projectName || name,
+    });
     const localFilePath = formattedProjectName + ".png";
     callback(null, localFilePath);
   },

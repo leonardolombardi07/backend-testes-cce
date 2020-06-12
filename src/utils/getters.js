@@ -7,3 +7,8 @@ exports.getQueryParameterByName = (name, url) => {
   if (!results[2]) return "";
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 };
+
+exports.getValidFileNameFromString = ({ string }) => {
+  const validFileName = string.replace(/[ &\/\\#,+()$~%.'":*?<>{}]/g, "");
+  return validFileName;
+};
