@@ -1,3 +1,5 @@
+const keys = require("../config/keys");
+
 exports.getQueryParameterByName = (name, url) => {
   if (!url) url = window.location.href;
   name = name.replace(/[\[\]]/g, "\\$&");
@@ -8,7 +10,27 @@ exports.getQueryParameterByName = (name, url) => {
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 };
 
-exports.getValidFileNameFromString = ({ string }) => {
-  const validFileName = string.replace(/[ &\/\\#,+()$~%.'":*?<>{}]/g, "");
-  return validFileName;
+const createEditedProjectObject = ({ orginalProjectName }) => {
+  const oldProjectName = orginalProjectName;
+  const formattedProjectName = getValidFileNameFromString({
+    string: projectName || oldProjectName,
+  });
+
+  const requestObject = {
+    projectName,
+    projectLogoUrl: projectLogo
+      ? `${keys.staticImagesUrl}${formattedProjectName}.png`
+      : null,
+    projectDescription,
+    projectBugsReport,
+  };
+
+  let editedDataObject = {};
+  for (var requestItem in requestObject) {
+    if (requestObject[requestItem]) {
+      editedProject[requestItem] = requestObject[requestItem];
+    }
+  }
+
+  return editedDataObject;
 };

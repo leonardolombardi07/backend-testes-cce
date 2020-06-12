@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 const requireAuth = require("../middlewares/requireAuth");
 const handleImages = require("../middlewares/handleImages");
 const { pathHandler } = require("../utils/pathHandlers");
-const { getValidFileNameFromString } = require("../utils/getters");
+const {
+  getProjectLogoUrl,
+  createEditedProject,
+} = require("../utils/projectHandlers");
 const keys = require("../config/keys");
 
 const Project = mongoose.model("Project");
@@ -16,24 +19,17 @@ const router = Router();
 router.use("/static", static(imagesPath));
 // router.use(requireAuth);
 
-router.get("/project/:name", async (request, response) => {
-  const { name } = request.params;
-
-  if (!name) {
-    return response
-      .status(500)
-      .json({ error: "Please provide a project name" });
-  }
-
+router.get("/project/:id", async (request, response) => {
+  const { id } = request.params;
   try {
-    const project = await Project.find({ projectName: name });
-    if (project.length === 0) {
-      throw new Error("We couldn't find a project with the given name");
+    const project = await Project.findById(id);
+    if (!project) {
+      throw new Error("We couldn't find a project with the given id");
     }
     response.status(200).json(project);
   } catch (error) {
     response.status(500).json({
-      error: "Sorry, something went wrong. Please try again later",
+      error: "Sorry, something went wrong. Please try again later.",
       detailedError: error.message,
     });
   }
@@ -45,7 +41,7 @@ router.get("/projects", async (request, response) => {
     response.status(200).json(projects);
   } catch (error) {
     response.status(500).json({
-      error: "Sorry, something went wrong. Please try again later!",
+      error: "Sorry, something went wrong. Please try again later.",
       detailedError: error.message,
     });
   }
@@ -55,22 +51,19 @@ router.post(
   "/projects",
   handleImages("projectLogo"),
   async (request, response) => {
-    const projectLogo = request.file;
     const { projectName, projectDescription, projectBugsReport } = request.body;
-    const formattedProjectName = getValidFileNameFromString(projectName);
+    const projectLogo = request.file;
 
     if (!projectName || !projectDescription) {
       return response.status(400).json({
-        error: "Please provide a project name and a project description",
+        error: "Please provide a project name and a project description.",
       });
     }
 
     try {
       const project = new Project({
         projectName,
-        projectLogoUrl: projectLogo
-          ? `${keys.staticImagesUrl}${formattedProjectName}.png`
-          : null,
+        projectLogoUrl: getProjectLogoUrl({ projectName, projectLogo }),
         projectDescription,
         projectBugsReport,
       });
@@ -78,8 +71,7 @@ router.post(
       response.status(201).json(project);
     } catch (error) {
       response.status(500).json({
-        error:
-          "Sorry, something went wrong in our database. Please try again later",
+        error: "Sorry, something went wrong. Please try again later.",
         detailedError: error.message,
       });
     }
@@ -87,53 +79,44 @@ router.post(
 );
 
 router.put(
-  "/project/:name",
+  "/project/:id",
   handleImages("projectLogo"),
   async (request, response) => {
-    const projectLogo = request.file;
-    const { name } = request.params;
-    console.log(request.query);
+    const { id } = request.params;
     const { projectName, projectDescription, projectBugsReport } = request.body;
+    const projectLogo = request.file;
 
-    const formattedProjectName = getValidFileNameFromString({
-      string: projectName || name,
-    });
-
-    const requestObject = {
-      projectName,
-      projectLogoUrl: projectLogo
-        ? `${keys.staticImagesUrl}${formattedProjectName}.png`
-        : null,
-      projectDescription,
-      projectBugsReport,
-    };
-
-    if (!name) {
+    if (!projectName) {
       return response
-        .status(500)
-        .json({ error: "Please provide a project name" });
+        .status(400)
+        .json({ error: "Please provide a project name." });
     }
 
-    try {
-      let editedProject = {};
-      for (var requestItem in requestObject) {
-        if (requestObject[requestItem]) {
-          editedProject[requestItem] = requestObject[requestItem];
-        }
-      }
+    const editedProject = createEditedProject({
+      projectName,
+      projectDescription,
+      projectBugsReport,
+      projectLogo,
+    });
 
+    try {
       const project = await Project.findOneAndUpdate(
-        { projectName: name },
+        { _id: id },
         editedProject
       );
 
       if (!project) {
-        throw new Error("We couldn't find a project with the given name");
+        throw new Error("We couldn't find a project with the given id");
       }
-      response.status(202).json(project);
+
+      const responseProject = {
+        ...project._doc,
+        ...editedProject,
+      };
+      response.status(202).json(responseProject);
     } catch (error) {
       response.status(500).json({
-        error: "Something went wrong in our server",
+        error: "Sorry, something went wrong. Please try again later.",
         detailedError: error.message,
       });
     }
