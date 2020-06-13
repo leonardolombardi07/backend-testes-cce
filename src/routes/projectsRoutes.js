@@ -17,10 +17,9 @@ const imagesPath = pathHandler({
 });
 
 const router = Router();
-router.use(requireAuth);
 router.use("/static", static(imagesPath));
 
-router.get("/project/:id", async (request, response) => {
+router.get("/project/:id", requireAuth, async (request, response) => {
   const { id } = request.params;
   try {
     const project = await Project.findById(id);
@@ -36,7 +35,7 @@ router.get("/project/:id", async (request, response) => {
   }
 });
 
-router.get("/projects", async (request, response) => {
+router.get("/projects", requireAuth, async (request, response) => {
   try {
     const projects = await Project.find();
     response.status(200).json(projects);
@@ -50,6 +49,7 @@ router.get("/projects", async (request, response) => {
 
 router.post(
   "/projects",
+  requireAuth,
   handleImages("projectLogo"),
   async (request, response) => {
     const { projectName, projectDescription, projectBugsReport } = request.body;
@@ -81,6 +81,7 @@ router.post(
 
 router.put(
   "/project/:id",
+  requireAuth,
   handleImages("projectLogo"),
   async (request, response) => {
     const { id } = request.params;
