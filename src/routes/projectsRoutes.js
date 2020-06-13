@@ -16,8 +16,8 @@ const imagesPath = pathHandler({
 });
 
 const router = Router();
+router.use(requireAuth);
 router.use("/static", static(imagesPath));
-// router.use(requireAuth);
 
 router.get("/project/:id", async (request, response) => {
   const { id } = request.params;

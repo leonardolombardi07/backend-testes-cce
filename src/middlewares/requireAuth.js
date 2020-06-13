@@ -13,12 +13,22 @@ module.exports = (request, response, next) => {
   const token = authorization;
   jwt.verify(token, keys.jwbSecretKey, async (error, payload) => {
     if (error) {
-      return response.status(404).json({ error: "You must be logged in" });
+      return response
+        .status(404)
+        .json({ error: "You must be logged in", token });
     }
 
     const { userId } = payload;
-    const user = await User.findById(userId);
-    request.user = user;
-    next();
+    try {
+      const user = await User.findById(userId);
+      request.user = user;
+      next();
+    } catch (error) {
+      console.log(error.message);
+      response.status(500).json({
+        error: "Something went wrong. Please try again later.",
+        detailedError: error.message,
+      });
+    }
   });
 };
