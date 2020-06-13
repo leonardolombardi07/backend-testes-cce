@@ -9,28 +9,3 @@ exports.getQueryParameterByName = (name, url) => {
   if (!results[2]) return "";
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 };
-
-const createEditedProjectObject = ({ orginalProjectName }) => {
-  const oldProjectName = orginalProjectName;
-  const formattedProjectName = getValidFileNameFromString({
-    string: projectName || oldProjectName,
-  });
-
-  const requestObject = {
-    projectName,
-    projectLogoUrl: projectLogo
-      ? `${keys.staticImagesUrl}${formattedProjectName}.png`
-      : null,
-    projectDescription,
-    projectBugsReport,
-  };
-
-  let editedDataObject = {};
-  for (var requestItem in requestObject) {
-    if (requestObject[requestItem]) {
-      editedProject[requestItem] = requestObject[requestItem];
-    }
-  }
-
-  return editedDataObject;
-};

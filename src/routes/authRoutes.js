@@ -1,22 +1,16 @@
 const { Router } = require("express");
 const mongoose = require("mongoose");
+
 const jwb = require("jsonwebtoken");
 const axios = require("axios");
-const nodemailer = require("nodemailer");
-const sendGridTransport = require("nodemailer-sendgrid-transport");
+const { transporter } = require("../services/sendGridMail");
+
 const keys = require("../config/keys");
 const { validateEmail, validatePassword } = require("../utils/validators");
 const { getQueryParameterByName } = require("../utils/getters");
 const { generateRandomPassword } = require("../utils/generateRandomPassword");
 
 const User = mongoose.model("User");
-const transporter = nodemailer.createTransport(
-  sendGridTransport({
-    auth: {
-      api_key: keys.sendGridApiKey,
-    },
-  })
-);
 
 const router = Router();
 

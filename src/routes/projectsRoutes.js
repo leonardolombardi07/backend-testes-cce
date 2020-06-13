@@ -1,13 +1,14 @@
 const { Router, static } = require("express");
 const mongoose = require("mongoose");
+
 const requireAuth = require("../middlewares/requireAuth");
 const handleImages = require("../middlewares/handleImages");
+
 const { pathHandler } = require("../utils/pathHandlers");
 const {
   getProjectLogoUrl,
   createEditedProject,
 } = require("../utils/projectHandlers");
-const keys = require("../config/keys");
 
 const Project = mongoose.model("Project");
 
