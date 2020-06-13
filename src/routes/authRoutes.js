@@ -56,7 +56,7 @@ router.get("/auth/podio/callback", async (request, response) => {
     }
 
     const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
-    response.status(200).json({ token });
+    response.status(200).json({ name, email, token });
   } catch (error) {
     response.status(500).json({
       error: "Something went wrong in podio servers",
@@ -94,7 +94,7 @@ router.post("/auth/signup", async (request, response) => {
     });
   } catch (error) {
     response.status(500).json({
-      error: "Something went wrong with our servers. Please try again later.",
+      error: "Something went wrong. Please try again later.",
       detailedError: error.message,
     });
   }
@@ -120,7 +120,7 @@ router.post("/auth/signin", async (request, response) => {
   try {
     await user.comparePassword(password);
     const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
-    response.status(200).json({ email, token });
+    response.status(200).json({ name: user.name, email, token });
   } catch (error) {
     response.status(500).json({
       error: "Please provide a valid email and password",
