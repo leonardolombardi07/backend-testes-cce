@@ -60,6 +60,7 @@ router.get("/auth/podio/callback", async (request, response) => {
       });
       await user.save();
     }
+
     const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
     response.status(200).json({ token });
   } catch (error) {
@@ -132,11 +133,6 @@ router.post("/auth/signin", async (request, response) => {
       detailedError: error.message,
     });
   }
-});
-
-router.get("/users", async (request, response) => {
-  const users = await User.find();
-  response.json({ users });
 });
 
 module.exports = router;
