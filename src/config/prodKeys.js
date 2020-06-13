@@ -5,4 +5,6 @@ module.exports = {
   podioAppSecret: process.env.PODIO_APP_SECRET,
   podioRedirectUrl: process.env.PODIO_REDIRECT_URL,
   staticImagesUrl: process.env.STATIC_IMAGES_URL,
+  sendGridApiKey: process.env.SEND_GRID_API_KEY,
+  sendGridSenderEmail: process.env.SEND_GRID_SENDER_EMAIL,
 };

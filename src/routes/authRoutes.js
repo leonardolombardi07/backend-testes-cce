@@ -1,13 +1,22 @@
-const { Router, request } = require("express");
+const { Router } = require("express");
 const mongoose = require("mongoose");
 const jwb = require("jsonwebtoken");
 const axios = require("axios");
+const nodemailer = require("nodemailer");
+const sendGridTransport = require("nodemailer-sendgrid-transport");
 const keys = require("../config/keys");
 const { validateEmail, validatePassword } = require("../utils/validators");
 const { getQueryParameterByName } = require("../utils/getters");
 const { generateRandomPassword } = require("../utils/generateRandomPassword");
 
 const User = mongoose.model("User");
+const transporter = nodemailer.createTransport(
+  sendGridTransport({
+    auth: {
+      api_key: keys.sendGridApiKey,
+    },
+  })
+);
 
 const router = Router();
 
@@ -43,10 +52,14 @@ router.get("/auth/podio/callback", async (request, response) => {
     if (!user) {
       const password = generateRandomPassword();
       user = new User({ name, email, password });
+      await transporter.sendMail({
+        to: email,
+        subject: "Welcome to Fluxo testes",
+        from: keys.sendGridSenderEmail,
+        html: `<h1>Welcome to Fluxo testes. This is your password if you don't want to login with Podio: ${password}</h1>`,
+      });
       await user.save();
-      // send email to "mail" address with password
     }
-    console.log(user);
     const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
     response.status(200).json({ token });
   } catch (error) {
@@ -115,7 +128,7 @@ router.post("/auth/signin", async (request, response) => {
     response.status(200).json({ email, token });
   } catch (error) {
     response.status(500).json({
-      error: "Something went wrong with our servers. Please try again later.",
+      error: "Please provide a valid email and password",
       detailedError: error.message,
     });
   }

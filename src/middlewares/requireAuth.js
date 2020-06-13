@@ -24,7 +24,6 @@ module.exports = (request, response, next) => {
       request.user = user;
       next();
     } catch (error) {
-      console.log(error.message);
       response.status(500).json({
         error: "Something went wrong. Please try again later.",
         detailedError: error.message,
