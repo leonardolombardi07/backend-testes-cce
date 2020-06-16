@@ -7,7 +7,9 @@ module.exports = (request, response, next) => {
   const { authorization } = request.headers;
 
   if (!authorization) {
-    return response.status(401).json({ error: "Please provide a token" });
+    return response
+      .status(401)
+      .json({ error: "Por favor providencie um token de autenticação." });
   }
 
   const token = authorization;
@@ -15,7 +17,10 @@ module.exports = (request, response, next) => {
     if (error) {
       return response
         .status(404)
-        .json({ error: "You must be logged in", token });
+        .json({
+          error: "Por favor providencie um token de autenticação válido.",
+          token,
+        });
     }
 
     const { userId } = payload;
@@ -25,7 +30,8 @@ module.exports = (request, response, next) => {
       next();
     } catch (error) {
       response.status(500).json({
-        error: "Something went wrong. Please try again later.",
+        error:
+          "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
         detailedError: error.message,
       });
     }

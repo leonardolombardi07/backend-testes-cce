@@ -19,45 +19,58 @@ const imagesPath = pathHandler({
 const router = Router();
 router.use("/static", static(imagesPath));
 
-router.get("/project/:id", requireAuth, async (request, response) => {
-  const { id } = request.params;
-  try {
-    const project = await Project.findById(id);
-    if (!project) {
-      throw new Error("We couldn't find a project with the given id");
+router.get(
+  "/project/:id",
+  // requireAuth,
+  async (request, response) => {
+    const { id } = request.params;
+    try {
+      const project = await Project.findById(id);
+      if (!project) {
+        throw new Error(
+          "Não conseguimos encontrar o projeto com a id especificada."
+        );
+      }
+      response.status(200).json(project);
+    } catch (error) {
+      response.status(500).json({
+        error:
+          "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
+        detailedError: error.message,
+      });
     }
-    response.status(200).json(project);
-  } catch (error) {
-    response.status(500).json({
-      error: "Sorry, something went wrong. Please try again later.",
-      detailedError: error.message,
-    });
   }
-});
+);
 
-router.get("/projects", requireAuth, async (request, response) => {
-  try {
-    const projects = await Project.find();
-    response.status(200).json(projects);
-  } catch (error) {
-    response.status(500).json({
-      error: "Sorry, something went wrong. Please try again later.",
-      detailedError: error.message,
-    });
+router.get(
+  "/projects",
+  // requireAuth,
+  async (request, response) => {
+    try {
+      const projects = await Project.find();
+      response.status(200).json(projects);
+    } catch (error) {
+      response.status(500).json({
+        error:
+          "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
+        detailedError: error.message,
+      });
+    }
   }
-});
+);
 
 router.post(
   "/projects",
-  requireAuth,
+  // requireAuth,
   handleImages("projectLogo"),
   async (request, response) => {
     const { projectName, projectDescription, projectBugsReport } = request.body;
     const projectLogo = request.file;
+    console.log(projectLogo);
 
     if (!projectName || !projectDescription) {
       return response.status(400).json({
-        error: "Please provide a project name and a project description.",
+        error: "Por favor providencie um nome e uma descrição pro projeto.",
       });
     }
 
@@ -72,7 +85,8 @@ router.post(
       response.status(201).json(project);
     } catch (error) {
       response.status(500).json({
-        error: "Sorry, something went wrong. Please try again later.",
+        error:
+          "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
         detailedError: error.message,
       });
     }
@@ -81,7 +95,7 @@ router.post(
 
 router.put(
   "/project/:id",
-  requireAuth,
+  // requireAuth,
   handleImages("projectLogo"),
   async (request, response) => {
     const { id } = request.params;
@@ -91,7 +105,7 @@ router.put(
     if (!projectName) {
       return response
         .status(400)
-        .json({ error: "Please provide a project name." });
+        .json({ error: "Por favor providencie um nome pro projeto." });
     }
 
     const editedProject = createEditedProject({
@@ -108,7 +122,9 @@ router.put(
       );
 
       if (!project) {
-        throw new Error("We couldn't find a project with the given id");
+        throw new Error(
+          "Não conseguimos encontrar o projeto com a id especificada."
+        );
       }
 
       const responseProject = {
@@ -118,7 +134,8 @@ router.put(
       response.status(202).json(responseProject);
     } catch (error) {
       response.status(500).json({
-        error: "Sorry, something went wrong. Please try again later.",
+        error:
+          "Tivemos algum problema nos nossos servidores. Por favor verifique se a id do projeto especificada é valida.",
         detailedError: error.message,
       });
     }

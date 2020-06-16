@@ -48,9 +48,9 @@ router.get("/auth/podio/callback", async (request, response) => {
       user = new User({ name, email, password });
       await transporter.sendMail({
         to: email,
-        subject: "Welcome to Fluxo testes",
+        subject: "Bem vindx à Fluxo testes",
         from: keys.sendGridSenderEmail,
-        html: `<h1>Welcome to Fluxo testes. This is your password if you don't want to login with Podio: ${password}</h1>`,
+        html: `<h1>Se não quiser entrar com o Pódio sempre, eis a sua senha: ${password}</h1>`,
       });
       await user.save();
     }
@@ -59,7 +59,8 @@ router.get("/auth/podio/callback", async (request, response) => {
     response.status(200).json({ name, email, token });
   } catch (error) {
     response.status(500).json({
-      error: "Something went wrong in podio servers",
+      error:
+        "Tivemos algum problema nos servidores do Pódio ou no envio do e-mail. Por favor tente novamente mais tarde.",
       detailedError: error.message,
     });
   }
@@ -71,15 +72,15 @@ router.post("/auth/signup", async (request, response) => {
   if (!name || !email || !password) {
     return response
       .status(400)
-      .json({ error: "Please provide a name, an email and a password" });
+      .json({ error: "Por favor providencie um nome, uma senha e um e-mail." });
   } else if (!validateEmail(email)) {
     return response
       .status(400)
-      .json({ error: "Please provide a valid email address" });
+      .json({ error: "Por favor providencie um endereço de e-mail válido." });
   } else if (!validatePassword(password)) {
     return response.status(400).json({
       error:
-        "Your password must contain eight characters, at least one letter and at least one number",
+        "Sua senha precisa conter ao menos 8 caractéres, ao menos uma letra e ao menos um número",
     });
   }
 
@@ -94,7 +95,8 @@ router.post("/auth/signup", async (request, response) => {
     });
   } catch (error) {
     response.status(500).json({
-      error: "Something went wrong. Please try again later.",
+      error:
+        "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
       detailedError: error.message,
     });
   }
@@ -106,14 +108,14 @@ router.post("/auth/signin", async (request, response) => {
   if (!email || !password) {
     return response
       .status(422)
-      .json({ error: "Please provide a valid email and password" });
+      .json({ error: "Por favor providencie um e-mail e uma senha." });
   }
 
   const user = await User.findOne({ email });
   if (!user) {
     return response.status(400).json({
       error:
-        "We couldn't find a user with this email. Try to Sign Up before Sign In",
+        "Não conseguimos encontrar esse e-mail. Tente se cadastrar antes de realizar o login.",
     });
   }
 
@@ -123,7 +125,7 @@ router.post("/auth/signin", async (request, response) => {
     response.status(200).json({ name: user.name, email, token });
   } catch (error) {
     response.status(500).json({
-      error: "Please provide a valid email and password",
+      error: "Senha incorreta.",
       detailedError: error.message,
     });
   }

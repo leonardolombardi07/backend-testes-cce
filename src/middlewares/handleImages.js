@@ -7,7 +7,7 @@ const fileFilter = (request, file, callback) => {
   if (type === "image/png") {
     callback(null, true);
   } else {
-    const error = new Error("The required file extension must be png");
+    const error = new Error("A extensão da imagem deve ser do tipo PNG.");
     callback(null, error);
   }
 };
@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
     const { projectName } = request.body;
 
     if (!projectName) {
-      const error = new Error("Please provide a project name.");
+      const error = new Error("Por favor providencie um nome pro projeto.");
       return callback(error);
     }
 
