@@ -66,10 +66,9 @@ router.post(
   async (request, response) => {
     const { projectName, projectDescription, projectBugsReport } = request.body;
     const projectLogo = request.file;
-    console.log(projectLogo);
 
     if (!projectName || !projectDescription) {
-      return response.status(400).json({
+      return response.status(401).json({
         error: "Por favor providencie um nome e uma descrição pro projeto.",
       });
     }
@@ -104,7 +103,7 @@ router.put(
 
     if (!projectName) {
       return response
-        .status(400)
+        .status(401)
         .json({ error: "Por favor providencie um nome pro projeto." });
     }
 

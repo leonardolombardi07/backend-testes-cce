@@ -15,9 +15,11 @@ const User = mongoose.model("User");
 const router = Router();
 
 router.get("/auth/podio", (request, response) => {
-  response.redirect(
-    `https://podio.com/oauth/authorize?client_id=${keys.podioClientId}&redirect_uri=${keys.podioRedirectUrl}&scope=user`
-  );
+  response
+    .status(200)
+    .json(
+      `https://podio.com/oauth/authorize?client_id=${keys.podioClientId}&redirect_uri=${keys.podioRedirectUrl}&scope=user`
+    );
 });
 
 router.get("/auth/podio/callback", async (request, response) => {
@@ -56,6 +58,7 @@ router.get("/auth/podio/callback", async (request, response) => {
     }
 
     const token = jwb.sign({ userId: user._id }, keys.jwbSecretKey);
+    response.send("<script>window.close();</script > ");
     response.status(200).json({ name, email, token });
   } catch (error) {
     response.status(500).json({
@@ -71,14 +74,14 @@ router.post("/auth/signup", async (request, response) => {
 
   if (!name || !email || !password) {
     return response
-      .status(400)
+      .status(401)
       .json({ error: "Por favor providencie um nome, uma senha e um e-mail." });
   } else if (!validateEmail(email)) {
     return response
-      .status(400)
+      .status(401)
       .json({ error: "Por favor providencie um endereço de e-mail válido." });
   } else if (!validatePassword(password)) {
-    return response.status(400).json({
+    return response.status(401).json({
       error:
         "Sua senha precisa conter ao menos 8 caractéres, ao menos uma letra e ao menos um número",
     });
@@ -113,7 +116,7 @@ router.post("/auth/signin", async (request, response) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    return response.status(400).json({
+    return response.status(401).json({
       error:
         "Não conseguimos encontrar esse e-mail. Tente se cadastrar antes de realizar o login.",
     });
