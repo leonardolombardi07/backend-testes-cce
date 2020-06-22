@@ -134,4 +134,37 @@ router.post("/auth/signin", async (request, response) => {
   }
 });
 
+router.post("/auth/forgot-password", async (request, response) => {
+  const { email, newPassword } = request.body;
+
+  if (!email || !newPassword) {
+    return response.status(401).json({
+      error: "Por favor providencie um e-mail e uma nova senha.",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return response.status(401).json({
+        error:
+          "Não conseguimos encontrar esse e-mail. Tente se cadastrar antes de requisitar uma nova senha.",
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    response.status(200).json({
+      message: "Senha atualizada",
+    });
+  } catch (error) {
+    response.status(500).json({
+      error:
+        "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
+      detailedError: error.message,
+    });
+  }
+});
+
 module.exports = router;
