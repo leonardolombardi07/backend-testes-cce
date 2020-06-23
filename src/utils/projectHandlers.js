@@ -5,27 +5,11 @@ exports.getValidFileNameFromString = ({ string }) => {
   return validFileName;
 };
 
-exports.getProjectLogoUrl = ({ projectLogo, projectName }) => {
-  if (projectLogo) {
-    const validFileName = this.getValidFileNameFromString({
-      string: projectName,
-    });
-    return `${keys.staticImagesUrl}${validFileName}.png`;
-  } else {
-    return null;
-  }
-};
-
-exports.createEditedProject = ({
-  projectLogo,
-  projectName,
-  projectDescription,
-  projectBugsReport,
-}) => {
+exports.createEditedProject = ({ name, description, bugsReport, logoKey }) => {
   const rawRequestObject = {
-    projectName,
-    projectDescription,
-    projectBugsReport,
+    name,
+    description,
+    bugsReport,
   };
 
   const editedProject = {};
@@ -36,11 +20,8 @@ exports.createEditedProject = ({
     }
   }
 
-  if (projectLogo) {
-    editedProject["projectLogoUrl"] = this.getProjectLogoUrl({
-      projectLogo,
-      projectName,
-    });
+  if (logoKey) {
+    editedProject["logoKey"] = logoKey;
   }
 
   return editedProject;

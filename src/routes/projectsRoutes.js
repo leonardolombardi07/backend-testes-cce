@@ -1,14 +1,13 @@
 const { Router, static } = require("express");
 const mongoose = require("mongoose");
+const axios = require("axios");
 
 const requireAuth = require("../middlewares/requireAuth");
-const handleImages = require("../middlewares/handleImages");
+const handleLogo = require("../middlewares/handleLogo");
 
 const { pathHandler } = require("../utils/pathHandlers");
-const {
-  getProjectLogoUrl,
-  createEditedProject,
-} = require("../utils/projectHandlers");
+const { createEditedProject } = require("../utils/projectHandlers");
+const getAwsUrl = require("../utils/getAwsUrl");
 
 const Project = mongoose.model("Project");
 
@@ -62,12 +61,12 @@ router.get(
 router.post(
   "/projects",
   // requireAuth,
-  handleImages("projectLogo"),
+  handleLogo("logoKey"),
   async (request, response) => {
-    const { projectName, projectDescription, projectBugsReport } = request.body;
-    const projectLogo = request.file;
+    const { name, description, bugsReport } = request.body;
+    const { key: logoKey } = request.file;
 
-    if (!projectName || !projectDescription) {
+    if (!name || !description) {
       return response.status(401).json({
         error: "Por favor providencie um nome e uma descrição pro projeto.",
       });
@@ -75,10 +74,10 @@ router.post(
 
     try {
       const project = new Project({
-        projectName,
-        projectLogoUrl: getProjectLogoUrl({ projectName, projectLogo }),
-        projectDescription,
-        projectBugsReport,
+        name,
+        description,
+        bugsReport,
+        logoKey,
       });
       await project.save();
       response.status(201).json(project);
@@ -93,52 +92,66 @@ router.post(
 );
 
 router.put(
-  "/project/:id",
+  "/projects/:id",
   // requireAuth,
-  handleImages("projectLogo"),
+  handleLogo("logoKey"),
   async (request, response) => {
     const { id } = request.params;
-    const { projectName, projectDescription, projectBugsReport } = request.body;
-    const projectLogo = request.file;
+    const { name, description, bugsReport } = request.body;
+    const logoKey = request.file ? request.file.key : null;
 
-    if (!projectName) {
+    if (!name) {
       return response
         .status(401)
         .json({ error: "Por favor providencie um nome pro projeto." });
     }
 
     const editedProject = createEditedProject({
-      projectName,
-      projectDescription,
-      projectBugsReport,
-      projectLogo,
+      name,
+      description,
+      bugsReport,
+      logoKey,
     });
 
     try {
       const project = await Project.findOneAndUpdate(
         { _id: id },
-        editedProject
+        editedProject,
+        { new: true }
       );
 
       if (!project) {
-        throw new Error(
-          "Não conseguimos encontrar o projeto com a id especificada."
-        );
+        return response.status(400).json({
+          error: "Não conseguimos encontrar o projeto com a id especificada.",
+        });
       }
 
-      const responseProject = {
-        ...project._doc,
-        ...editedProject,
-      };
-      response.status(202).json(responseProject);
+      response.status(202).json(project);
     } catch (error) {
       response.status(500).json({
         error:
-          "Tivemos algum problema nos nossos servidores. Por favor verifique se a id do projeto especificada é valida.",
+          "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
         detailedError: error.message,
       });
     }
   }
 );
+
+router.get("/projects/:logoKey", async (request, response) => {
+  const { logoKey } = request.params;
+
+  try {
+    const awsImageUrl = getAwsUrl(logoKey);
+    const { data } = await axios.get(awsImageUrl);
+
+    response.status(200).json(data);
+  } catch (error) {
+    response.status(500).json({
+      error:
+        "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
+      detailedError: error.message,
+    });
+  }
+});
 
 module.exports = router;

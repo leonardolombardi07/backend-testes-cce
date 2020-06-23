@@ -1,20 +1,14 @@
 const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const compression = require("compression");
-
 require("./services/database");
-const authRoutes = require("./routes/authRoutes");
-const projectsRoutes = require("./routes/projectsRoutes");
 
 const server = express();
-server.use(cors());
-server.use(helmet());
-server.use(compression());
-
+server.use(require("cors")());
 server.use(express.json());
-server.use(authRoutes);
-server.use(projectsRoutes);
+server.use(require("helmet")());
+server.use(require("compression")());
+
+server.use(require("./routes/authRoutes"));
+server.use(require("./routes/projectsRoutes"));
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

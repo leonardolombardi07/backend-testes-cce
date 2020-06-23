@@ -1,19 +1,19 @@
 const mongoose = require("mongoose");
 
 const projectSchema = new mongoose.Schema({
-  projectName: {
+  name: {
     type: String,
     required: true,
     unique: true,
   },
-  projectLogoUrl: {
+  logoKey: {
     type: String,
   },
-  projectDescription: {
+  description: {
     type: String,
     required: true,
   },
-  projectBugsReport: {
+  bugsReport: {
     type: String,
     default: "",
   },

@@ -7,4 +7,7 @@ module.exports = {
   staticImagesUrl: process.env.STATIC_IMAGES_URL,
   sendGridApiKey: process.env.SEND_GRID_API_KEY,
   sendGridSenderEmail: process.env.SEND_GRID_SENDER_EMAIL,
+  awsBucket: process.env.BUCKET_NAME,
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
 };
