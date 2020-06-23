@@ -64,7 +64,6 @@ router.post(
   handleLogo("logoKey"),
   async (request, response) => {
     const { name, description, bugsReport } = request.body;
-    const { key: logoKey } = request.file;
 
     if (!name || !description) {
       return response.status(401).json({
@@ -77,7 +76,7 @@ router.post(
         name,
         description,
         bugsReport,
-        logoKey,
+        logoKey: request.file ? request.file.key : null,
       });
       await project.save();
       response.status(201).json(project);
@@ -98,7 +97,6 @@ router.put(
   async (request, response) => {
     const { id } = request.params;
     const { name, description, bugsReport } = request.body;
-    const logoKey = request.file ? request.file.key : null;
 
     if (!name) {
       return response
@@ -110,7 +108,7 @@ router.put(
       name,
       description,
       bugsReport,
-      logoKey,
+      logoKey: request.file ? request.file.key : null,
     });
 
     try {

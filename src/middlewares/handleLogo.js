@@ -1,9 +1,9 @@
 const multer = require("multer");
-const path = require("path");
-const { uuid } = require("uuidv4");
-
 const multerS3 = require("multer-s3");
 const s3 = require("../services/awsStorage");
+
+const path = require("path");
+const { uuid } = require("uuidv4");
 
 const mongoose = require("mongoose");
 const Project = mongoose.model("Project");
@@ -11,11 +11,23 @@ const Project = mongoose.model("Project");
 const storageTypes = {
   local: multer.diskStorage({
     destination: (request, file, callback) => {
-      callback(null, path.resolve(__dirname, "..", "..", "tmp", "uploads"));
+      callback(null, path.resolve(__dirname, "..", "data", "images"));
     },
-    filename: (request, file, callback) => {
-      file.key = `${uuid()}-${file.originalname}`;
-      callback(null, file.key);
+    filename: async (request, file, callback) => {
+      const { id } = request.params;
+
+      if (!id) {
+        file.key = `${uuid()}.png`;
+        return callback(null, file.key);
+      }
+
+      try {
+        const project = await Project.findById(id);
+        file.key = project.logoKey;
+        callback(null, file.key);
+      } catch (error) {
+        callback(null, "something");
+      }
     },
   }),
   aws: multerS3({
@@ -42,7 +54,6 @@ const storageTypes = {
   }),
 };
 
-// const type = process.env.NODE_ENV === "production" ? "aws" : "local";
-const type = "aws";
+const type = process.env.NODE_ENV === "production" ? "aws" : "local";
 const storage = storageTypes[type];
 module.exports = (formDataName) => multer({ storage }).single(formDataName);
