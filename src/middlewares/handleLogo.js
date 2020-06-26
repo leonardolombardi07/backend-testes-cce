@@ -17,16 +17,21 @@ const storageTypes = {
       const { id } = request.params;
 
       if (!id) {
-        file.key = `${uuid()}.png`;
-        return callback(null, file.key);
+        file.location = `${uuid()}.png`;
+        return callback(null, file.location);
       }
 
       try {
         const project = await Project.findById(id);
-        file.key = project.logoKey;
-        callback(null, file.key);
+        if (!project?.logoUrl) {
+          file.location = `${uuid()}.png`;
+          return callback(null, file.location);
+        }
+
+        file.location = project.logoUrl;
+        callback(null, file.location);
       } catch (error) {
-        callback(null, "something");
+        callback(null, "Something went wrong.");
       }
     },
   }),
@@ -45,7 +50,16 @@ const storageTypes = {
 
       try {
         const project = await Project.findById(id);
-        const fileName = project.logoKey;
+
+        if (!project) {
+          throw new Error(
+            "Não conseguimos encontrar o projeto com a id especificada."
+          );
+        }
+
+        const fileName = project?.logoUrl
+          ? project.logoUrl.slice(59, -1)
+          : `${uuid()}`;
         callback(null, fileName);
       } catch (error) {
         callback(error, null);
@@ -55,5 +69,5 @@ const storageTypes = {
 };
 
 const type = process.env.NODE_ENV === "production" ? "aws" : "local";
-const storage = storageTypes[type];
+const storage = storageTypes["aws"]; // mudar "aws" pra type
 module.exports = (formDataName) => multer({ storage }).single(formDataName);

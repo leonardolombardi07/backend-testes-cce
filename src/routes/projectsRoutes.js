@@ -1,13 +1,11 @@
 const { Router, static } = require("express");
 const mongoose = require("mongoose");
-const axios = require("axios");
 
 const requireAuth = require("../middlewares/requireAuth");
 const handleLogo = require("../middlewares/handleLogo");
 
 const { pathHandler } = require("../utils/pathHandlers");
 const { createEditedProject } = require("../utils/projectHandlers");
-const getAwsUrl = require("../utils/getAwsUrl");
 
 const Project = mongoose.model("Project");
 
@@ -61,7 +59,7 @@ router.get(
 router.post(
   "/projects",
   // requireAuth,
-  handleLogo("logoKey"),
+  handleLogo("logoUrl"),
   async (request, response) => {
     const { name, description, bugsReport } = request.body;
 
@@ -76,7 +74,7 @@ router.post(
         name,
         description,
         bugsReport,
-        logoKey: request.file ? request.file.key : null,
+        logoUrl: request.file ? request.file.location : null,
       });
       await project.save();
       response.status(201).json(project);
@@ -93,22 +91,22 @@ router.post(
 router.put(
   "/projects/:id",
   // requireAuth,
-  handleLogo("logoKey"),
+  handleLogo("logoUrl"),
   async (request, response) => {
     const { id } = request.params;
     const { name, description, bugsReport } = request.body;
 
-    if (!name) {
-      return response
-        .status(401)
-        .json({ error: "Por favor providencie um nome pro projeto." });
+    if (!name || !description) {
+      return response.status(401).json({
+        error: "Por favor providencie um nome e uma descrição pro projeto.",
+      });
     }
 
     const editedProject = createEditedProject({
       name,
       description,
       bugsReport,
-      logoKey: request.file ? request.file.key : null,
+      logoUrl: request.file ? request.file.location : null,
     });
 
     try {
@@ -134,22 +132,5 @@ router.put(
     }
   }
 );
-
-router.get("/projects/:logoKey", async (request, response) => {
-  const { logoKey } = request.params;
-
-  try {
-    const awsImageUrl = getAwsUrl(logoKey);
-    const { data } = await axios.get(awsImageUrl);
-
-    response.status(200).json(data);
-  } catch (error) {
-    response.status(500).json({
-      error:
-        "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
-      detailedError: error.message,
-    });
-  }
-});
 
 module.exports = router;

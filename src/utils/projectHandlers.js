@@ -1,11 +1,4 @@
-const keys = require("../config/keys");
-
-exports.getValidFileNameFromString = ({ string }) => {
-  const validFileName = string.replace(/[ &\/\\#,+()$~%.'":*?<>{}]/g, "");
-  return validFileName;
-};
-
-exports.createEditedProject = ({ name, description, bugsReport, logoKey }) => {
+exports.createEditedProject = ({ name, description, bugsReport, logoUrl }) => {
   const rawRequestObject = {
     name,
     description,
@@ -20,8 +13,8 @@ exports.createEditedProject = ({ name, description, bugsReport, logoKey }) => {
     }
   }
 
-  if (logoKey) {
-    editedProject["logoKey"] = logoKey;
+  if (logoUrl) {
+    editedProject["logoUrl"] = logoUrl;
   }
 
   return editedProject;

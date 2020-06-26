@@ -16,5 +16,9 @@ mongoose.connect(
     if (connection) {
       console.log("Sucessfully connect to mongoDB database");
     }
+
+    if (error) {
+      console.log("Something went wrong");
+    }
   }
 );

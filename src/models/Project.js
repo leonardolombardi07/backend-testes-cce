@@ -6,9 +6,6 @@ const projectSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  logoKey: {
-    type: String,
-  },
   description: {
     type: String,
     required: true,
@@ -16,6 +13,10 @@ const projectSchema = new mongoose.Schema({
   bugsReport: {
     type: String,
     default: "",
+  },
+  logoUrl: {
+    type: String,
+    default: null,
   },
 });
 
