@@ -2,7 +2,7 @@ const { Router, static } = require("express");
 const mongoose = require("mongoose");
 
 const requireAuth = require("../middlewares/requireAuth");
-const handleLogo = require("../middlewares/handleLogo");
+const handleImage = require("../middlewares/handleImage");
 
 const { pathHandler } = require("../utils/pathHandlers");
 const { createEditedProject } = require("../utils/projectHandlers");
@@ -59,7 +59,8 @@ router.get(
 router.post(
   "/projects",
   // requireAuth,
-  handleLogo("logoUrl"),
+  // handleLogo("logoUrl"),
+  handleImage("image"),
   async (request, response) => {
     const { name, description, bugsReport } = request.body;
 
@@ -91,7 +92,7 @@ router.post(
 router.put(
   "/projects/:id",
   // requireAuth,
-  handleLogo("logoUrl"),
+  handleImage("image"),
   async (request, response) => {
     const { id } = request.params;
     const { name, description, bugsReport } = request.body;
