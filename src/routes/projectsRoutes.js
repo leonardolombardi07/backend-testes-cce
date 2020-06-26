@@ -16,50 +16,41 @@ const imagesPath = pathHandler({
 const router = Router();
 router.use("/static", static(imagesPath));
 
-router.get(
-  "/project/:id",
-  // requireAuth,
-  async (request, response) => {
-    const { id } = request.params;
-    try {
-      const project = await Project.findById(id);
-      if (!project) {
-        throw new Error(
-          "Não conseguimos encontrar o projeto com a id especificada."
-        );
-      }
-      response.status(200).json(project);
-    } catch (error) {
-      response.status(500).json({
-        error:
-          "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
-        detailedError: error.message,
-      });
+router.get("/project/:id", requireAuth, async (request, response) => {
+  const { id } = request.params;
+  try {
+    const project = await Project.findById(id);
+    if (!project) {
+      throw new Error(
+        "Não conseguimos encontrar o projeto com a id especificada."
+      );
     }
+    response.status(200).json(project);
+  } catch (error) {
+    response.status(500).json({
+      error:
+        "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
+      detailedError: error.message,
+    });
   }
-);
+});
 
-router.get(
-  "/projects",
-  // requireAuth,
-  async (request, response) => {
-    try {
-      const projects = await Project.find();
-      response.status(200).json(projects);
-    } catch (error) {
-      response.status(500).json({
-        error:
-          "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
-        detailedError: error.message,
-      });
-    }
+router.get("/projects", requireAuth, async (request, response) => {
+  try {
+    const projects = await Project.find();
+    response.status(200).json(projects);
+  } catch (error) {
+    response.status(500).json({
+      error:
+        "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
+      detailedError: error.message,
+    });
   }
-);
+});
 
 router.post(
   "/projects",
-  // requireAuth,
-  // handleLogo("logoUrl"),
+  requireAuth,
   handleImage("image"),
   async (request, response) => {
     const { name, description, bugsReport } = request.body;
@@ -91,7 +82,7 @@ router.post(
 
 router.put(
   "/projects/:id",
-  // requireAuth,
+  requireAuth,
   handleImage("image"),
   async (request, response) => {
     const { id } = request.params;
