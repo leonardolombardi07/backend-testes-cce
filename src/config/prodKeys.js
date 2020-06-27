@@ -10,4 +10,5 @@ module.exports = {
   awsBucket: process.env.BUCKET_NAME,
   awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
   awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
+  domainBaseUrl: process.env.DOMAIN_BASE_URL,
 };

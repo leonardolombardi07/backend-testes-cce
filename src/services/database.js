@@ -4,21 +4,23 @@ const keys = require("../config/keys");
 require("../models/User");
 require("../models/Project");
 
-mongoose.connect(
-  keys.mongoUri,
-  {
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-  },
-  (error, connection) => {
-    if (connection) {
-      console.log("Sucessfully connect to mongoDB database");
-    }
+exports.connectToDatabase = () => {
+  return mongoose.connect(
+    keys.mongoUri,
+    {
+      useCreateIndex: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    },
+    (error, connection) => {
+      if (connection) {
+        console.log("Conectado ao banco de dados mongoDB");
+      }
 
-    if (error) {
-      console.log("Something went wrong");
+      if (error) {
+        console.log("Não foi possível conectar ao banco de dados");
+      }
     }
-  }
-);
+  );
+};

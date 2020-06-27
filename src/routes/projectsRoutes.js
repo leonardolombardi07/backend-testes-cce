@@ -94,6 +94,7 @@ router.put(
       });
     }
 
+    console.log(request.file);
     const editedProject = createEditedProject({
       name,
       description,

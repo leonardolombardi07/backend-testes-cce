@@ -15,12 +15,10 @@ module.exports = (request, response, next) => {
   const token = authorization;
   jwt.verify(token, keys.jwbSecretKey, async (error, payload) => {
     if (error) {
-      return response
-        .status(404)
-        .json({
-          error: "Por favor providencie um token de autenticação válido.",
-          token,
-        });
+      return response.status(404).json({
+        error: "Por favor providencie um token de autenticação válido.",
+        token,
+      });
     }
 
     const { userId } = payload;

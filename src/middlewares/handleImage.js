@@ -12,8 +12,29 @@ const storage = multerS3({
   contentType: multerS3.AUTO_CONTENT_TYPE,
   acl: "public-read",
   key: async (request, file, callback) => {
+    const { id } = request.params;
+    const { method } = request;
+
     // toDo: se for um PUT/PATCH, deletar imagem antiga do projeto
-    const fileName = `${uuid()}`;
+    let fileName = `${uuid()}`;
+    if (method === "PUT" || method === "PATCH") {
+      try {
+        const project = await Project.findById(id);
+        if (!project) {
+          callback(null, fileName);
+        }
+
+        const oldLogoUrl = project?.logoUrl;
+        const n = oldLogoUrl.lastIndexOf("/");
+        fileName = oldLogoUrl.substring(n + 1);
+
+        console.log(fileName);
+        callback(null, fileName);
+      } catch (error) {
+        callback(false);
+      }
+    }
+
     callback(null, fileName);
   },
 });

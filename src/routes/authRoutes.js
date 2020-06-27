@@ -9,6 +9,7 @@ const keys = require("../config/keys");
 const { validateEmail, validatePassword } = require("../utils/validators");
 const { getQueryParameterByName } = require("../utils/getters");
 const { generateRandomPassword } = require("../utils/generateRandomPassword");
+const { generateToken } = require("../utils/generateToken");
 
 const User = mongoose.model("User");
 
@@ -135,11 +136,11 @@ router.post("/auth/signin", async (request, response) => {
 });
 
 router.post("/auth/forgot-password", async (request, response) => {
-  const { email, newPassword } = request.body;
+  const { email } = request.body;
 
-  if (!email || !newPassword) {
+  if (!email) {
     return response.status(401).json({
-      error: "Por favor providencie um e-mail e uma nova senha.",
+      error: "Por favor providencie um e-mail.",
     });
   }
 
@@ -148,15 +149,72 @@ router.post("/auth/forgot-password", async (request, response) => {
     if (!user) {
       return response.status(401).json({
         error:
-          "Não conseguimos encontrar esse e-mail. Tente se cadastrar antes de requisitar uma nova senha.",
+          "Não conseguimos encontrar um usuário com esse e-mail. Tente se cadastrar antes de requisitar uma nova senha.",
       });
     }
 
+    const token = await generateToken();
+    user.resetPasswordToken = token;
+    user.resetPasswordTokenExpirationDate = Date.now() + 1 * 60 * 60 * 1000;
+    await user.save();
+
+    // toDo: enviar no html um template bonito
+    await transporter.sendMail({
+      to: email,
+      subject: "Esqueceu sua senha?",
+      from: keys.sendGridSenderEmail,
+      html: `
+      <p> Você pediu pra atualizar sua senha. </p>
+      <p> Clique  <a href="${keys.domainBaseUrl}/reset-password/${token}"> nesse link </a> para atualizar sua senha
+      Após uma hora o token para atualizar a senha não será mais válido </p>
+      `,
+    });
+
+    response.status(200).json({
+      message: "Email enviado",
+    });
+  } catch (error) {
+    response.status(500).json({
+      error:
+        "Tivemos algum problema nos nossos servidores. Por favor tente novamente mais tarde.",
+      detailedError: error.message,
+    });
+  }
+});
+
+router.post("/auth/reset-password/:token", async (request, response) => {
+  const { token } = request.params;
+  const { newPassword } = request.body;
+
+  if (!token) {
+    return response.status(400).json({
+      error: "Por favor forneça um token de autenticação.",
+    });
+  }
+
+  if (!validatePassword(newPassword)) {
+    return response.status(401).json({
+      error:
+        "Sua senha precisa conter ao menos 8 caractéres, ao menos uma letra e ao menos um número",
+    });
+  }
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordTokenExpirationDate: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return response.status(400).json({
+        error: "Por favor forneça um token de autenticação válido.",
+      });
+    }
     user.password = newPassword;
     await user.save();
 
     response.status(200).json({
-      message: "Senha atualizada",
+      message: "Senha atualizada com sucesso",
     });
   } catch (error) {
     response.status(500).json({
