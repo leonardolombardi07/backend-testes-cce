@@ -12,7 +12,7 @@
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
-    "aws-sdk": "^2.702.0",
+    "aws-sdk": "^2.814.0",
     "axios": "^0.19.2",
     "bcrypt": "^5.0.0",
     "compression": "^1.7.4",
